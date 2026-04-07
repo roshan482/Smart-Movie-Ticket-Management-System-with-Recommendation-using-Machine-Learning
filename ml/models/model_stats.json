@@ -1,0 +1,32 @@
+{
+  "n_movies": 60,
+  "n_interactions": 2474,
+  "n_users_train": 150,
+  "nmf_components": 15,
+  "nmf_error": 214.11209106445312,
+  "content_features": 60,
+  "avg_sim": 0.14422473250292644,
+  "genres_covered": [
+    "Action",
+    "Animation",
+    "Biography",
+    "Comedy",
+    "Drama",
+    "Fantasy",
+    "Horror",
+    "Mystery",
+    "Romance",
+    "Sci-Fi",
+    "Sports",
+    "Thriller"
+  ],
+  "langs_covered": [
+    "English",
+    "Hindi",
+    "Kannada",
+    "Malayalam",
+    "Marathi",
+    "Tamil",
+    "Telugu"
+  ]
+}

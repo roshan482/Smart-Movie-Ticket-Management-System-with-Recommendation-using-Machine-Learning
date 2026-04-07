@@ -1,0 +1,61 @@
+movie_id,title,genre,language,rating,price,seats_left,primary_mood,genre_action,genre_romance,genre_comedy,genre_thriller,genre_horror,genre_sci_fi,genre_animation,genre_drama,genre_mystery,genre_fantasy,genre_biography,genre_sports,lang_hindi,lang_english,lang_marathi,lang_tamil,lang_telugu,lang_bengali,lang_kannada,lang_malayalam,mood_chill_n_relax,mood_thrills_n_chills,mood_feel_good,mood_mind-bending,mood_emotional_ride,mood_laugh_out_loud
+1,Inferno Rising,Action,English,8.4,280,53,Thrills & Chills,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+2,Eternal Bloom,Romance,Hindi,7.9,220,69,Feel Good,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0
+3,Pixel Quest,Animation,English,8.7,220,56,Feel Good,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+4,Shadow Protocol,Thriller,English,8.1,280,61,Thrills & Chills,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+5,Cosmic Drift,Sci-Fi,English,9.0,350,63,Mind-Bending,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+6,Hasi Ke Rang,Comedy,Hindi,7.5,180,68,Chill & Relax,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+7,Whisper in Dark,Horror,English,7.8,220,65,Thrills & Chills,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+8,Yaar Mera,Drama,Marathi,8.2,220,64,Emotional Ride,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0
+9,Dil Ki Baat,Romance,Hindi,7.6,180,85,Feel Good,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0
+10,Steel Storm,Action,English,8.0,280,77,Thrills & Chills,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+11,Hasee Ke Haseen,Comedy,Hindi,7.3,180,90,Laugh Out Loud,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1
+12,Neon Shadows,Sci-Fi,English,8.5,280,59,Thrills & Chills,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+13,Gumnaam Raat,Mystery,Hindi,7.7,220,82,Thrills & Chills,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+14,Dragon Heart,Fantasy,English,8.3,280,55,Mind-Bending,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+15,Sachin: A Billion Dreams,Biography,English,8.6,220,64,Emotional Ride,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+16,Chennai Express,Comedy,Hindi,7.4,180,77,Chill & Relax,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+17,Raazi,Thriller,Hindi,8.5,220,58,Thrills & Chills,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+18,Tumbbad,Horror,Marathi,8.9,220,49,Thrills & Chills,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0
+19,Kantara,Drama,Kannada,9.1,220,55,Emotional Ride,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0
+20,RRR,Action,Telugu,8.8,280,58,Thrills & Chills,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0
+21,Vikram,Action,Tamil,8.3,280,74,Feel Good,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0
+22,Maharaja,Action,Tamil,8.4,220,54,Feel Good,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0
+23,Kalki 2898 AD,Sci-Fi,Telugu,8.0,280,77,Thrills & Chills,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0
+24,Pushpa 2,Action,Telugu,7.8,220,75,Thrills & Chills,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0
+25,Stree 2,Horror,Hindi,8.2,220,74,Thrills & Chills,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+26,Munjya,Horror,Marathi,7.6,180,86,Thrills & Chills,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0
+27,Gol Maal Again,Comedy,Hindi,7.1,180,84,Feel Good,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0
+28,Dune Part Two,Sci-Fi,English,8.9,350,48,Mind-Bending,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+29,Oppenheimer,Biography,English,9.0,280,52,Emotional Ride,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+30,Barbie,Comedy,English,7.8,220,65,Chill & Relax,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+31,Interstellar,Sci-Fi,English,8.7,280,52,Mind-Bending,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+32,The Dark Knight,Thriller,English,9.0,280,53,Mind-Bending,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+33,Inception,Sci-Fi,English,8.8,280,67,Thrills & Chills,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+34,PK,Comedy,Hindi,8.4,220,58,Chill & Relax,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+35,3 Idiots,Comedy,Hindi,9.0,220,56,Chill & Relax,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+36,Dangal,Sports,Hindi,8.8,220,55,Feel Good,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0
+37,Sultan,Sports,Hindi,7.9,220,81,Laugh Out Loud,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1
+38,Chak De India,Sports,Hindi,8.5,220,71,Feel Good,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0
+39,Dhoom 3,Action,Hindi,6.8,220,90,Thrills & Chills,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+40,War,Action,Hindi,7.6,280,71,Thrills & Chills,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+41,Spider-Man: NWH,Action,English,8.5,280,64,Feel Good,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+42,Avengers Endgame,Action,English,8.4,350,73,Feel Good,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+43,Doctor Strange MoM,Fantasy,English,6.9,280,90,Chill & Relax,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+44,Thor Love Thunder,Fantasy,English,6.6,280,90,Feel Good,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+45,Wakanda Forever,Action,English,7.3,280,77,Thrills & Chills,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+46,Moana 2,Animation,English,7.8,220,73,Feel Good,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+47,Inside Out 2,Animation,English,8.1,220,66,Laugh Out Loud,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1
+48,Elemental,Animation,English,7.4,220,75,Feel Good,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+49,Zara Hatke Zara Bachke,Romance,Hindi,7.2,180,82,Feel Good,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0
+50,Rocky Aur Rani,Romance,Hindi,7.5,220,87,Chill & Relax,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+51,Tum Bin 2,Romance,Hindi,6.5,180,90,Emotional Ride,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0
+52,Article 15,Drama,Hindi,8.2,220,61,Chill & Relax,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+53,Masaan,Drama,Hindi,8.3,180,59,Chill & Relax,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+54,Taare Zameen Par,Drama,Hindi,8.6,220,68,Emotional Ride,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0
+55,Queen,Drama,Hindi,8.2,220,75,Chill & Relax,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+56,Piku,Drama,Hindi,7.9,180,79,Chill & Relax,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0
+57,Andhadhun,Thriller,Hindi,8.7,220,60,Mind-Bending,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0
+58,Kahaani,Mystery,Hindi,8.2,220,61,Mind-Bending,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0
+59,Drishyam 2,Mystery,Malayalam,8.1,220,60,Thrills & Chills,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0
+60,Vikrant Rona,Fantasy,Kannada,7.3,220,73,Feel Good,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0

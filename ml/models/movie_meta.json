@@ -1,0 +1,602 @@
+{
+  "1": {
+    "movie_id": 1,
+    "title": "Inferno Rising",
+    "genre": "Action",
+    "language": "English",
+    "rating": 8.4,
+    "price": 280,
+    "seats_left": 53,
+    "primary_mood": "Thrills & Chills"
+  },
+  "2": {
+    "movie_id": 2,
+    "title": "Eternal Bloom",
+    "genre": "Romance",
+    "language": "Hindi",
+    "rating": 7.9,
+    "price": 220,
+    "seats_left": 69,
+    "primary_mood": "Feel Good"
+  },
+  "3": {
+    "movie_id": 3,
+    "title": "Pixel Quest",
+    "genre": "Animation",
+    "language": "English",
+    "rating": 8.7,
+    "price": 220,
+    "seats_left": 56,
+    "primary_mood": "Feel Good"
+  },
+  "4": {
+    "movie_id": 4,
+    "title": "Shadow Protocol",
+    "genre": "Thriller",
+    "language": "English",
+    "rating": 8.1,
+    "price": 280,
+    "seats_left": 61,
+    "primary_mood": "Thrills & Chills"
+  },
+  "5": {
+    "movie_id": 5,
+    "title": "Cosmic Drift",
+    "genre": "Sci-Fi",
+    "language": "English",
+    "rating": 9.0,
+    "price": 350,
+    "seats_left": 63,
+    "primary_mood": "Mind-Bending"
+  },
+  "6": {
+    "movie_id": 6,
+    "title": "Hasi Ke Rang",
+    "genre": "Comedy",
+    "language": "Hindi",
+    "rating": 7.5,
+    "price": 180,
+    "seats_left": 68,
+    "primary_mood": "Chill & Relax"
+  },
+  "7": {
+    "movie_id": 7,
+    "title": "Whisper in Dark",
+    "genre": "Horror",
+    "language": "English",
+    "rating": 7.8,
+    "price": 220,
+    "seats_left": 65,
+    "primary_mood": "Thrills & Chills"
+  },
+  "8": {
+    "movie_id": 8,
+    "title": "Yaar Mera",
+    "genre": "Drama",
+    "language": "Marathi",
+    "rating": 8.2,
+    "price": 220,
+    "seats_left": 64,
+    "primary_mood": "Emotional Ride"
+  },
+  "9": {
+    "movie_id": 9,
+    "title": "Dil Ki Baat",
+    "genre": "Romance",
+    "language": "Hindi",
+    "rating": 7.6,
+    "price": 180,
+    "seats_left": 85,
+    "primary_mood": "Feel Good"
+  },
+  "10": {
+    "movie_id": 10,
+    "title": "Steel Storm",
+    "genre": "Action",
+    "language": "English",
+    "rating": 8.0,
+    "price": 280,
+    "seats_left": 77,
+    "primary_mood": "Thrills & Chills"
+  },
+  "11": {
+    "movie_id": 11,
+    "title": "Hasee Ke Haseen",
+    "genre": "Comedy",
+    "language": "Hindi",
+    "rating": 7.3,
+    "price": 180,
+    "seats_left": 90,
+    "primary_mood": "Laugh Out Loud"
+  },
+  "12": {
+    "movie_id": 12,
+    "title": "Neon Shadows",
+    "genre": "Sci-Fi",
+    "language": "English",
+    "rating": 8.5,
+    "price": 280,
+    "seats_left": 59,
+    "primary_mood": "Thrills & Chills"
+  },
+  "13": {
+    "movie_id": 13,
+    "title": "Gumnaam Raat",
+    "genre": "Mystery",
+    "language": "Hindi",
+    "rating": 7.7,
+    "price": 220,
+    "seats_left": 82,
+    "primary_mood": "Thrills & Chills"
+  },
+  "14": {
+    "movie_id": 14,
+    "title": "Dragon Heart",
+    "genre": "Fantasy",
+    "language": "English",
+    "rating": 8.3,
+    "price": 280,
+    "seats_left": 55,
+    "primary_mood": "Mind-Bending"
+  },
+  "15": {
+    "movie_id": 15,
+    "title": "Sachin: A Billion Dreams",
+    "genre": "Biography",
+    "language": "English",
+    "rating": 8.6,
+    "price": 220,
+    "seats_left": 64,
+    "primary_mood": "Emotional Ride"
+  },
+  "16": {
+    "movie_id": 16,
+    "title": "Chennai Express",
+    "genre": "Comedy",
+    "language": "Hindi",
+    "rating": 7.4,
+    "price": 180,
+    "seats_left": 77,
+    "primary_mood": "Chill & Relax"
+  },
+  "17": {
+    "movie_id": 17,
+    "title": "Raazi",
+    "genre": "Thriller",
+    "language": "Hindi",
+    "rating": 8.5,
+    "price": 220,
+    "seats_left": 58,
+    "primary_mood": "Thrills & Chills"
+  },
+  "18": {
+    "movie_id": 18,
+    "title": "Tumbbad",
+    "genre": "Horror",
+    "language": "Marathi",
+    "rating": 8.9,
+    "price": 220,
+    "seats_left": 49,
+    "primary_mood": "Thrills & Chills"
+  },
+  "19": {
+    "movie_id": 19,
+    "title": "Kantara",
+    "genre": "Drama",
+    "language": "Kannada",
+    "rating": 9.1,
+    "price": 220,
+    "seats_left": 55,
+    "primary_mood": "Emotional Ride"
+  },
+  "20": {
+    "movie_id": 20,
+    "title": "RRR",
+    "genre": "Action",
+    "language": "Telugu",
+    "rating": 8.8,
+    "price": 280,
+    "seats_left": 58,
+    "primary_mood": "Thrills & Chills"
+  },
+  "21": {
+    "movie_id": 21,
+    "title": "Vikram",
+    "genre": "Action",
+    "language": "Tamil",
+    "rating": 8.3,
+    "price": 280,
+    "seats_left": 74,
+    "primary_mood": "Feel Good"
+  },
+  "22": {
+    "movie_id": 22,
+    "title": "Maharaja",
+    "genre": "Action",
+    "language": "Tamil",
+    "rating": 8.4,
+    "price": 220,
+    "seats_left": 54,
+    "primary_mood": "Feel Good"
+  },
+  "23": {
+    "movie_id": 23,
+    "title": "Kalki 2898 AD",
+    "genre": "Sci-Fi",
+    "language": "Telugu",
+    "rating": 8.0,
+    "price": 280,
+    "seats_left": 77,
+    "primary_mood": "Thrills & Chills"
+  },
+  "24": {
+    "movie_id": 24,
+    "title": "Pushpa 2",
+    "genre": "Action",
+    "language": "Telugu",
+    "rating": 7.8,
+    "price": 220,
+    "seats_left": 75,
+    "primary_mood": "Thrills & Chills"
+  },
+  "25": {
+    "movie_id": 25,
+    "title": "Stree 2",
+    "genre": "Horror",
+    "language": "Hindi",
+    "rating": 8.2,
+    "price": 220,
+    "seats_left": 74,
+    "primary_mood": "Thrills & Chills"
+  },
+  "26": {
+    "movie_id": 26,
+    "title": "Munjya",
+    "genre": "Horror",
+    "language": "Marathi",
+    "rating": 7.6,
+    "price": 180,
+    "seats_left": 86,
+    "primary_mood": "Thrills & Chills"
+  },
+  "27": {
+    "movie_id": 27,
+    "title": "Gol Maal Again",
+    "genre": "Comedy",
+    "language": "Hindi",
+    "rating": 7.1,
+    "price": 180,
+    "seats_left": 84,
+    "primary_mood": "Feel Good"
+  },
+  "28": {
+    "movie_id": 28,
+    "title": "Dune Part Two",
+    "genre": "Sci-Fi",
+    "language": "English",
+    "rating": 8.9,
+    "price": 350,
+    "seats_left": 48,
+    "primary_mood": "Mind-Bending"
+  },
+  "29": {
+    "movie_id": 29,
+    "title": "Oppenheimer",
+    "genre": "Biography",
+    "language": "English",
+    "rating": 9.0,
+    "price": 280,
+    "seats_left": 52,
+    "primary_mood": "Emotional Ride"
+  },
+  "30": {
+    "movie_id": 30,
+    "title": "Barbie",
+    "genre": "Comedy",
+    "language": "English",
+    "rating": 7.8,
+    "price": 220,
+    "seats_left": 65,
+    "primary_mood": "Chill & Relax"
+  },
+  "31": {
+    "movie_id": 31,
+    "title": "Interstellar",
+    "genre": "Sci-Fi",
+    "language": "English",
+    "rating": 8.7,
+    "price": 280,
+    "seats_left": 52,
+    "primary_mood": "Mind-Bending"
+  },
+  "32": {
+    "movie_id": 32,
+    "title": "The Dark Knight",
+    "genre": "Thriller",
+    "language": "English",
+    "rating": 9.0,
+    "price": 280,
+    "seats_left": 53,
+    "primary_mood": "Mind-Bending"
+  },
+  "33": {
+    "movie_id": 33,
+    "title": "Inception",
+    "genre": "Sci-Fi",
+    "language": "English",
+    "rating": 8.8,
+    "price": 280,
+    "seats_left": 67,
+    "primary_mood": "Thrills & Chills"
+  },
+  "34": {
+    "movie_id": 34,
+    "title": "PK",
+    "genre": "Comedy",
+    "language": "Hindi",
+    "rating": 8.4,
+    "price": 220,
+    "seats_left": 58,
+    "primary_mood": "Chill & Relax"
+  },
+  "35": {
+    "movie_id": 35,
+    "title": "3 Idiots",
+    "genre": "Comedy",
+    "language": "Hindi",
+    "rating": 9.0,
+    "price": 220,
+    "seats_left": 56,
+    "primary_mood": "Chill & Relax"
+  },
+  "36": {
+    "movie_id": 36,
+    "title": "Dangal",
+    "genre": "Sports",
+    "language": "Hindi",
+    "rating": 8.8,
+    "price": 220,
+    "seats_left": 55,
+    "primary_mood": "Feel Good"
+  },
+  "37": {
+    "movie_id": 37,
+    "title": "Sultan",
+    "genre": "Sports",
+    "language": "Hindi",
+    "rating": 7.9,
+    "price": 220,
+    "seats_left": 81,
+    "primary_mood": "Laugh Out Loud"
+  },
+  "38": {
+    "movie_id": 38,
+    "title": "Chak De India",
+    "genre": "Sports",
+    "language": "Hindi",
+    "rating": 8.5,
+    "price": 220,
+    "seats_left": 71,
+    "primary_mood": "Feel Good"
+  },
+  "39": {
+    "movie_id": 39,
+    "title": "Dhoom 3",
+    "genre": "Action",
+    "language": "Hindi",
+    "rating": 6.8,
+    "price": 220,
+    "seats_left": 90,
+    "primary_mood": "Thrills & Chills"
+  },
+  "40": {
+    "movie_id": 40,
+    "title": "War",
+    "genre": "Action",
+    "language": "Hindi",
+    "rating": 7.6,
+    "price": 280,
+    "seats_left": 71,
+    "primary_mood": "Thrills & Chills"
+  },
+  "41": {
+    "movie_id": 41,
+    "title": "Spider-Man: NWH",
+    "genre": "Action",
+    "language": "English",
+    "rating": 8.5,
+    "price": 280,
+    "seats_left": 64,
+    "primary_mood": "Feel Good"
+  },
+  "42": {
+    "movie_id": 42,
+    "title": "Avengers Endgame",
+    "genre": "Action",
+    "language": "English",
+    "rating": 8.4,
+    "price": 350,
+    "seats_left": 73,
+    "primary_mood": "Feel Good"
+  },
+  "43": {
+    "movie_id": 43,
+    "title": "Doctor Strange MoM",
+    "genre": "Fantasy",
+    "language": "English",
+    "rating": 6.9,
+    "price": 280,
+    "seats_left": 90,
+    "primary_mood": "Chill & Relax"
+  },
+  "44": {
+    "movie_id": 44,
+    "title": "Thor Love Thunder",
+    "genre": "Fantasy",
+    "language": "English",
+    "rating": 6.6,
+    "price": 280,
+    "seats_left": 90,
+    "primary_mood": "Feel Good"
+  },
+  "45": {
+    "movie_id": 45,
+    "title": "Wakanda Forever",
+    "genre": "Action",
+    "language": "English",
+    "rating": 7.3,
+    "price": 280,
+    "seats_left": 77,
+    "primary_mood": "Thrills & Chills"
+  },
+  "46": {
+    "movie_id": 46,
+    "title": "Moana 2",
+    "genre": "Animation",
+    "language": "English",
+    "rating": 7.8,
+    "price": 220,
+    "seats_left": 73,
+    "primary_mood": "Feel Good"
+  },
+  "47": {
+    "movie_id": 47,
+    "title": "Inside Out 2",
+    "genre": "Animation",
+    "language": "English",
+    "rating": 8.1,
+    "price": 220,
+    "seats_left": 66,
+    "primary_mood": "Laugh Out Loud"
+  },
+  "48": {
+    "movie_id": 48,
+    "title": "Elemental",
+    "genre": "Animation",
+    "language": "English",
+    "rating": 7.4,
+    "price": 220,
+    "seats_left": 75,
+    "primary_mood": "Feel Good"
+  },
+  "49": {
+    "movie_id": 49,
+    "title": "Zara Hatke Zara Bachke",
+    "genre": "Romance",
+    "language": "Hindi",
+    "rating": 7.2,
+    "price": 180,
+    "seats_left": 82,
+    "primary_mood": "Feel Good"
+  },
+  "50": {
+    "movie_id": 50,
+    "title": "Rocky Aur Rani",
+    "genre": "Romance",
+    "language": "Hindi",
+    "rating": 7.5,
+    "price": 220,
+    "seats_left": 87,
+    "primary_mood": "Chill & Relax"
+  },
+  "51": {
+    "movie_id": 51,
+    "title": "Tum Bin 2",
+    "genre": "Romance",
+    "language": "Hindi",
+    "rating": 6.5,
+    "price": 180,
+    "seats_left": 90,
+    "primary_mood": "Emotional Ride"
+  },
+  "52": {
+    "movie_id": 52,
+    "title": "Article 15",
+    "genre": "Drama",
+    "language": "Hindi",
+    "rating": 8.2,
+    "price": 220,
+    "seats_left": 61,
+    "primary_mood": "Chill & Relax"
+  },
+  "53": {
+    "movie_id": 53,
+    "title": "Masaan",
+    "genre": "Drama",
+    "language": "Hindi",
+    "rating": 8.3,
+    "price": 180,
+    "seats_left": 59,
+    "primary_mood": "Chill & Relax"
+  },
+  "54": {
+    "movie_id": 54,
+    "title": "Taare Zameen Par",
+    "genre": "Drama",
+    "language": "Hindi",
+    "rating": 8.6,
+    "price": 220,
+    "seats_left": 68,
+    "primary_mood": "Emotional Ride"
+  },
+  "55": {
+    "movie_id": 55,
+    "title": "Queen",
+    "genre": "Drama",
+    "language": "Hindi",
+    "rating": 8.2,
+    "price": 220,
+    "seats_left": 75,
+    "primary_mood": "Chill & Relax"
+  },
+  "56": {
+    "movie_id": 56,
+    "title": "Piku",
+    "genre": "Drama",
+    "language": "Hindi",
+    "rating": 7.9,
+    "price": 180,
+    "seats_left": 79,
+    "primary_mood": "Chill & Relax"
+  },
+  "57": {
+    "movie_id": 57,
+    "title": "Andhadhun",
+    "genre": "Thriller",
+    "language": "Hindi",
+    "rating": 8.7,
+    "price": 220,
+    "seats_left": 60,
+    "primary_mood": "Mind-Bending"
+  },
+  "58": {
+    "movie_id": 58,
+    "title": "Kahaani",
+    "genre": "Mystery",
+    "language": "Hindi",
+    "rating": 8.2,
+    "price": 220,
+    "seats_left": 61,
+    "primary_mood": "Mind-Bending"
+  },
+  "59": {
+    "movie_id": 59,
+    "title": "Drishyam 2",
+    "genre": "Mystery",
+    "language": "Malayalam",
+    "rating": 8.1,
+    "price": 220,
+    "seats_left": 60,
+    "primary_mood": "Thrills & Chills"
+  },
+  "60": {
+    "movie_id": 60,
+    "title": "Vikrant Rona",
+    "genre": "Fantasy",
+    "language": "Kannada",
+    "rating": 7.3,
+    "price": 220,
+    "seats_left": 73,
+    "primary_mood": "Feel Good"
+  }
+}
