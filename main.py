@@ -137,6 +137,7 @@ class LandingPage(tk.Frame):
         super().__init__(master, bg=BG_DARK)
         self.show_login_cb    = show_login_cb
         self.show_register_cb = show_register_cb
+        self._sections        = {}
         self._canvas = tk.Canvas(self, bg=BG_DARK, highlightthickness=0, bd=0)
         self._vsb    = ttk.Scrollbar(self, orient="vertical",
                                      command=self._canvas.yview)
@@ -160,6 +161,8 @@ class LandingPage(tk.Frame):
         self._build_hero()
         self._build_feature_strip()
         self._build_now_showing()
+        self._build_about_us()
+        self._build_contact_us()
         self._build_footer()
 
     def _build_navbar(self):
@@ -180,13 +183,18 @@ class LandingPage(tk.Frame):
                  bg=BG_NAV, fg=TXT_GREY).pack(anchor="w")
         right = tk.Frame(nav, bg=BG_NAV)
         right.pack(side="right", padx=18)
-        for lbl_text, active in [("Home",True),("Movies",False),
-                                   ("About Us",False),("Contact Us",False)]:
+        for lbl_text, active, key in [("Home", True, "home"),
+                                      ("Movies", False, "movies"),
+                                      ("About Us", False, "about"),
+                                      ("Contact Us", False, "contact")]:
             col = TXT_WHITE if active else TXT_GREY
             l = tk.Label(right, text=lbl_text,
                          font=("Trebuchet MS", 9, "underline" if active else ""),
                          bg=BG_NAV, fg=col, cursor="hand2")
             l.pack(side="left", padx=10)
+            l.bind("<Button-1>", lambda e, section=key: self._scroll_to_section(section))
+            l.bind("<Enter>", lambda e, w=l: w.config(fg=TXT_WHITE))
+            l.bind("<Leave>", lambda e, w=l, c=col: w.config(fg=c))
         self._nav_btn(right, "Login",   outline=True,  cb=self.show_login_cb)
         self._nav_btn(right, "Sign Up", outline=False, cb=self.show_register_cb)
 
@@ -207,6 +215,7 @@ class LandingPage(tk.Frame):
         hero = tk.Frame(self._inner, bg="#1A0C08", height=320)
         hero.pack(fill="x")
         hero.pack_propagate(False)
+        self._sections["home"] = hero
         pc = ParticleCanvas(hero, bg="#1A0C08",
                             highlightthickness=0, bd=0, width=1200, height=320)
         pc.place(x=0, y=0, relwidth=1, relheight=1)
@@ -230,7 +239,7 @@ class LandingPage(tk.Frame):
         btn_row = tk.Frame(ct, bg="#0D0605")
         btn_row.pack(anchor="w", padx=24)
         self._hero_btn(btn_row, "🎟  Book Tickets", filled=True,  cb=self.show_login_cb)
-        self._hero_btn(btn_row, "🎬  View Movies",  filled=False, cb=self.show_login_cb)
+        self._hero_btn(btn_row, "?  View Movies",  filled=False, cb=lambda: self._scroll_to_section("movies"))
         tk.Label(hero, text="🎥\n🍿\n🎞",
                  font=("Segoe UI Emoji", 42),
                  bg="#1A0C08", justify="center").place(
@@ -280,6 +289,7 @@ class LandingPage(tk.Frame):
     def _build_now_showing(self):
         sec = tk.Frame(self._inner, bg=BG_DARK, pady=24)
         sec.pack(fill="x", padx=40)
+        self._sections["movies"] = sec
         tk.Label(sec, text="Now Showing",
                  font=("Georgia", 18, "bold"),
                  bg=BG_DARK, fg=TXT_WHITE).pack(anchor="w")
@@ -325,6 +335,71 @@ class LandingPage(tk.Frame):
                   lambda e: self.show_login_cb() if self.show_login_cb else None)
         book.bind("<Enter>", lambda e, w=book: w.config(bg="#B01010"))
         book.bind("<Leave>", lambda e, w=book: w.config(bg=ACCENT_RED))
+
+
+    def _build_about_us(self):
+        sec = tk.Frame(self._inner, bg="#120D0D", pady=24, padx=40)
+        sec.pack(fill="x")
+        self._sections["about"] = sec
+        tk.Label(sec, text="About Us",
+                 font=("Georgia", 18, "bold"),
+                 bg="#120D0D", fg=TXT_WHITE).pack(anchor="w")
+        tk.Label(sec,
+                 text="Smart Movie Ticket Management helps movie lovers discover shows, reserve seats, and manage bookings with a smooth theatre-style experience.",
+                 font=("Trebuchet MS", 10),
+                 bg="#120D0D", fg=TXT_GREY, wraplength=980, justify="left").pack(anchor="w", pady=(6, 16))
+        cards = tk.Frame(sec, bg="#120D0D")
+        cards.pack(fill="x")
+        items = [
+            ("Fast Booking", "Browse shows, pick seats, and confirm tickets in a few clicks."),
+            ("Live Availability", "Seat counts and bookings stay connected to the database for every user."),
+            ("Personal Dashboard", "Track your bookings, ratings, and activity from one place."),
+        ]
+        for title, body in items:
+            card = tk.Frame(cards, bg=CARD_BG, highlightbackground=BORDER_DIM, highlightthickness=1, padx=18, pady=16)
+            card.pack(side="left", fill="both", expand=True, padx=8)
+            tk.Label(card, text=title,
+                     font=("Trebuchet MS", 11, "bold"),
+                     bg=CARD_BG, fg=TXT_WHITE).pack(anchor="w")
+            tk.Label(card, text=body,
+                     font=("Trebuchet MS", 8),
+                     bg=CARD_BG, fg=TXT_GREY, wraplength=250, justify="left").pack(anchor="w", pady=(8, 0))
+
+    def _build_contact_us(self):
+        sec = tk.Frame(self._inner, bg="#0E0909", pady=24, padx=40)
+        sec.pack(fill="x")
+        self._sections["contact"] = sec
+        tk.Label(sec, text="Contact Us",
+                 font=("Georgia", 18, "bold"),
+                 bg="#0E0909", fg=TXT_WHITE).pack(anchor="w")
+        tk.Label(sec, text="Reach out for support, theatre onboarding, or booking assistance.",
+                 font=("Trebuchet MS", 10),
+                 bg="#0E0909", fg=TXT_GREY).pack(anchor="w", pady=(6, 14))
+        contact = tk.Frame(sec, bg="#0E0909")
+        contact.pack(anchor="w")
+        details = [
+            ("Email", "support@smartmovie.local"),
+            ("Phone", "+91 98765 43210"),
+            ("Hours", "Mon-Sun 9:00 AM to 11:00 PM"),
+        ]
+        for title, value in details:
+            row = tk.Frame(contact, bg="#0E0909")
+            row.pack(anchor="w", pady=3)
+            tk.Label(row, text=f"{title}:",
+                     font=("Trebuchet MS", 9, "bold"),
+                     bg="#0E0909", fg=ACCENT_ORG, width=10, anchor="w").pack(side="left")
+            tk.Label(row, text=value,
+                     font=("Trebuchet MS", 9),
+                     bg="#0E0909", fg=TXT_WHITE, anchor="w").pack(side="left")
+
+    def _scroll_to_section(self, key: str):
+        section = self._sections.get(key)
+        if not section:
+            return
+        self.update_idletasks()
+        inner_height = max(1, self._inner.winfo_height())
+        y = max(0, section.winfo_y())
+        self._canvas.yview_moveto(y / inner_height)
 
     def _build_footer(self):
         ft = tk.Frame(self._inner, bg="#0A0808", pady=16)
@@ -414,23 +489,12 @@ class App(tk.Tk):
         is_first_login, so we no longer need a separate DB call for routing.
         """
         try:
-            from auth_service import login_user   # flat import — same dir as main.py
+            from services.auth_service import login_user   # flat import — same dir as main.py
             result = login_user(email, password)
         except Exception as exc:
             print(f"[AUTH] login_user error: {exc}")
             import traceback; traceback.print_exc()
-            # Demo fallback — only reached when DB is unreachable.
-            # is_first_login=0 so we go to Dashboard (not an infinite onboarding loop)
-            result = {
-                "success": True,
-                "user": {
-                    "user_id":        1,
-                    "full_name":      "Demo User",
-                    "email":          email,
-                    "is_first_login": 0,   # 0 = skip onboarding in demo/offline mode
-                    "preferences":    None,
-                },
-            }
+            return False
 
         if result["success"]:
             self._current_user = result["user"]
@@ -459,7 +523,7 @@ class App(tk.Tk):
         else:
             # Load stored preferences from DB for the Dashboard
             try:
-                from auth_service import get_user_preferences
+                from services.auth_service import get_user_preferences
                 prefs = get_user_preferences(user["user_id"])
             except Exception:
                 prefs = None
@@ -500,7 +564,7 @@ class App(tk.Tk):
         uid = self._current_user["user_id"]
 
         try:
-            from auth_service import save_user_preferences
+            from services.auth_service import save_user_preferences
             ok = save_user_preferences(uid, prefs)
             if ok:
                 print(f"[ONBOARDING] ✅ Prefs saved to DB for user {uid}: {prefs}")
@@ -523,7 +587,7 @@ class App(tk.Tk):
         self._user_prefs = partial_prefs or {}
         # Clear the flag in DB so onboarding never appears again
         try:
-            from auth_service import clear_first_login
+            from services.auth_service import clear_first_login
             clear_first_login(self._current_user["user_id"])
         except Exception as exc:
             print(f"[ONBOARDING] clear_first_login error: {exc}")

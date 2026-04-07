@@ -27,7 +27,7 @@ DB schema used
 
 import tkinter as tk
 from tkinter import ttk, messagebox
-import math, random, time, sys, os, json
+import math, random, time, sys, os, json, re
 
 # ── Path fix ─────────────────────────────────────────────────────────────────
 _SELF = os.path.dirname(os.path.abspath(__file__))
@@ -96,8 +96,6 @@ SIDEBAR_ITEMS = [
     ("🎟", "Book Ticket",  ACCENT_RED,  "book"),
     ("📋", "My Bookings",  ACCENT_BLUE, "bookings"),
     ("⭐", "Rate a Movie", ACCENT_ORG,  "rate"),
-    ("👤", "My Profile",   TXT_GREY,    "profile"),
-    ("⚙️", "Settings",    TXT_MUTED,   "settings"),
 ]
 
 _GENRE_EMOJI = {
@@ -126,6 +124,150 @@ def _db():
         return None
 
 
+def _duration_minutes(tag: str) -> int:
+    match = re.search(r"(\d+)h\s*(\d+)m", str(tag or ""))
+    if not match:
+        return 120
+    hours = int(match.group(1))
+    minutes = int(match.group(2))
+    return hours * 60 + minutes
+
+
+def _ensure_movies_seeded(conn):
+    cur = conn.cursor(dictionary=True)
+    cur.execute("SELECT movie_id, title FROM movies")
+    rows = cur.fetchall() or []
+    if rows:
+        return rows
+
+    insert_cur = conn.cursor()
+    for movie in ALL_MOVIES:
+        insert_cur.execute(
+            """INSERT INTO movies
+               (title, genre, language, rating, duration, description, poster_path, is_active)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, 1)""",
+            (
+                movie["title"],
+                movie["genre"],
+                movie.get("lang", "English"),
+                str(movie.get("rating", 0)),
+                _duration_minutes(movie.get("tag", "")),
+                f"{movie['title']} is now showing.",
+                "",
+            ),
+        )
+    conn.commit()
+    cur.execute("SELECT movie_id, title FROM movies")
+    return cur.fetchall() or []
+
+
+def _ensure_show_seats(conn, show_id: int, total_seats: int):
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM seats WHERE show_id = %s", (show_id,))
+    existing = int(cur.fetchone()[0] or 0)
+    if existing:
+        return
+
+    total_seats = max(1, int(total_seats or 60))
+    cols = 10
+    for index in range(total_seats):
+        row_label = chr(65 + (index // cols))
+        seat_number = index + 1
+        cur.execute(
+            """INSERT INTO seats (show_id, seat_number, seat_row, is_booked)
+               VALUES (%s, %s, %s, 0)""",
+            (show_id, seat_number, row_label),
+        )
+    conn.commit()
+
+
+def _ensure_shows_seeded(conn, movie_id: int):
+    cur = conn.cursor(dictionary=True)
+    cur.execute(
+        """SELECT show_id, show_date, show_time, hall, total_seats, price
+           FROM shows
+           WHERE movie_id = %s
+           ORDER BY show_date, show_time""",
+        (movie_id,),
+    )
+    shows = cur.fetchall() or []
+    if shows:
+        for show in shows:
+            _ensure_show_seats(conn, show["show_id"], show.get("total_seats", 60))
+        return
+
+    cur.execute("SELECT title FROM movies WHERE movie_id = %s", (movie_id,))
+    movie_row = cur.fetchone() or {}
+    movie_title = str(movie_row.get("title") or "")
+    meta = next((m for m in ALL_MOVIES if m["title"].lower() == movie_title.lower()), None)
+    price = int((meta or {}).get("price", 200))
+    genre = (meta or {}).get("genre", "")
+    today = time.localtime()
+    dates = [
+        time.strftime("%Y-%m-%d", today),
+        time.strftime("%Y-%m-%d", time.localtime(time.mktime(today) + 86400)),
+    ]
+    show_specs = [
+        (dates[0], "13:00:00", "Hall 1", price),
+        (dates[0], "18:30:00", "Hall 2", price + 20),
+        (dates[1], "21:15:00", "IMAX" if genre in ("Action", "Sci-Fi") else "Hall 3", price + 40),
+    ]
+
+    insert_cur = conn.cursor()
+    for show_date, show_time, hall, show_price in show_specs:
+        insert_cur.execute(
+            """INSERT INTO shows
+               (movie_id, show_date, show_time, hall, total_seats, price)
+               VALUES (%s, %s, %s, %s, %s, %s)""",
+            (movie_id, show_date, show_time, hall, 60, show_price),
+        )
+        _ensure_show_seats(conn, insert_cur.lastrowid, 60)
+    conn.commit()
+
+
+def _reconcile_existing_bookings(conn):
+    cur = conn.cursor(dictionary=True)
+    cur.execute(
+        """SELECT b.booking_id, b.show_id, b.total_seats
+           FROM bookings b
+           LEFT JOIN booking_seats bs ON bs.booking_id = b.booking_id
+           WHERE b.status = 'confirmed'
+           GROUP BY b.booking_id, b.show_id, b.total_seats
+           HAVING COUNT(bs.id) = 0"""
+    )
+    orphaned = cur.fetchall() or []
+    if not orphaned:
+        return
+
+    write_cur = conn.cursor()
+    for booking in orphaned:
+        show_id = booking.get("show_id")
+        seats_needed = int(booking.get("total_seats") or 0)
+        if not show_id or seats_needed <= 0:
+            continue
+        write_cur.execute(
+            """SELECT seat_id
+               FROM seats
+               WHERE show_id = %s AND is_booked = 0
+               ORDER BY seat_id
+               LIMIT %s""",
+            (show_id, seats_needed),
+        )
+        seat_rows = write_cur.fetchall()
+        if len(seat_rows) != seats_needed:
+            continue
+        for (seat_id,) in seat_rows:
+            write_cur.execute(
+                "INSERT INTO booking_seats (booking_id, seat_id) VALUES (%s, %s)",
+                (booking["booking_id"], seat_id),
+            )
+            write_cur.execute(
+                "UPDATE seats SET is_booked = 1 WHERE seat_id = %s",
+                (seat_id,),
+            )
+    conn.commit()
+
+
 def _fetch_movies_from_db() -> list:
     """
     Fetch active movies from DB.
@@ -133,15 +275,19 @@ def _fetch_movies_from_db() -> list:
     """
     conn = _db()
     if not conn:
-        return ALL_MOVIES
+        return []
     try:
+        _ensure_movies_seeded(conn)
         cur = conn.cursor(dictionary=True)
         cur.execute(
             "SELECT movie_id, title, genre, language, rating, duration "
             "FROM movies WHERE is_active=1 ORDER BY title")
         rows = cur.fetchall() or []
         if not rows:
-            return ALL_MOVIES
+            return []
+        for row in rows:
+            _ensure_shows_seeded(conn, row["movie_id"])
+        _reconcile_existing_bookings(conn)
 
         result = []
         for r in rows:
@@ -177,10 +323,10 @@ def _fetch_movies_from_db() -> list:
                     "tag":    f"{dur} min" if dur else "—",
                     "price":  200,
                 })
-        return result if result else ALL_MOVIES
+        return result
     except Exception as exc:
         print(f"[DASH] _fetch_movies_from_db: {exc}")
-        return ALL_MOVIES
+        return []
     finally:
         conn.close()
 
@@ -195,6 +341,7 @@ def _fetch_shows_for_movie(movie_id: int) -> list:
     if not conn:
         return []
     try:
+        _ensure_shows_seeded(conn, movie_id)
         cur = conn.cursor(dictionary=True)
         cur.execute(
             """SELECT s.show_id, s.movie_id, s.show_date, s.show_time,
@@ -214,6 +361,68 @@ def _fetch_shows_for_movie(movie_id: int) -> list:
         conn.close()
 
 
+def _build_demo_shows(movie: dict) -> list:
+    """
+    Provide a deterministic fallback schedule when the DB has no shows yet.
+    This keeps the booking flow usable for the built-in demo catalogue.
+    """
+    base_seats = movie.get("seats", 30)
+    try:
+        base_seats = max(8, int(base_seats))
+    except (TypeError, ValueError):
+        base_seats = 30
+
+    base_price = movie.get("price", 200)
+    try:
+        base_price = max(100, float(base_price))
+    except (TypeError, ValueError):
+        base_price = 200.0
+
+    today = time.localtime()
+    date_a = time.strftime("%Y-%m-%d", today)
+    date_b = time.strftime(
+        "%Y-%m-%d",
+        time.localtime(time.mktime(today) + 86400),
+    )
+
+    movie_seed = int(movie.get("id", 0) or 0)
+    return [
+        {
+            "show_id": -(movie_seed * 10 + 1),
+            "movie_id": movie.get("id"),
+            "show_date": date_a,
+            "show_time": "13:00:00",
+            "hall": "Hall 1",
+            "total_seats": 60,
+            "price": int(base_price),
+            "available_seats": max(6, min(60, base_seats)),
+            "is_demo_show": True,
+        },
+        {
+            "show_id": -(movie_seed * 10 + 2),
+            "movie_id": movie.get("id"),
+            "show_date": date_a,
+            "show_time": "18:30:00",
+            "hall": "Hall 2",
+            "total_seats": 60,
+            "price": int(base_price + 20),
+            "available_seats": max(4, min(60, base_seats - 5)),
+            "is_demo_show": True,
+        },
+        {
+            "show_id": -(movie_seed * 10 + 3),
+            "movie_id": movie.get("id"),
+            "show_date": date_b,
+            "show_time": "21:15:00",
+            "hall": "IMAX" if movie.get("genre") in ("Action", "Sci-Fi") else "Hall 3",
+            "total_seats": 60,
+            "price": int(base_price + 40),
+            "available_seats": max(2, min(60, base_seats - 10)),
+            "is_demo_show": True,
+        },
+    ]
+
+
 def _fetch_seats_for_show(show_id: int) -> list:
     """
     Return all seat rows for a show.
@@ -223,6 +432,14 @@ def _fetch_seats_for_show(show_id: int) -> list:
     if not conn:
         return []
     try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            "SELECT total_seats FROM shows WHERE show_id = %s LIMIT 1",
+            (show_id,),
+        )
+        show_row = cur.fetchone() or {}
+        if show_row:
+            _ensure_show_seats(conn, show_id, show_row.get("total_seats", 60))
         cur = conn.cursor(dictionary=True)
         cur.execute(
             """SELECT seat_id, seat_number, seat_row, is_booked
@@ -252,17 +469,21 @@ def _fetch_user_stats(user_id: int) -> dict:
         cur = conn.cursor(dictionary=True)
 
         cur.execute(
-            "SELECT COUNT(*) AS cnt, COALESCE(SUM(total_amount), 0) AS spent "
-            "FROM bookings WHERE user_id = %s", (user_id,))
+            "SELECT COUNT(*) AS cnt FROM bookings WHERE user_id = %s", (user_id,))
         row = cur.fetchone() or {}
         defaults["booked"] = int(row.get("cnt", 0))
-        defaults["spent"]  = int(float(row.get("spent", 0)))
 
         cur.execute(
             "SELECT COUNT(*) AS cnt FROM bookings "
             "WHERE user_id = %s AND status = 'confirmed'", (user_id,))
         row2 = cur.fetchone() or {}
         defaults["watched"] = int(row2.get("cnt", 0))
+
+        cur.execute(
+            "SELECT COALESCE(SUM(total_amount), 0) AS spent FROM bookings "
+            "WHERE user_id = %s AND status = 'confirmed'", (user_id,))
+        row_spent = cur.fetchone() or {}
+        defaults["spent"] = int(float(row_spent.get("spent", 0)))
 
         cur.execute(
             "SELECT COALESCE(AVG(score), 0) AS avg FROM ratings WHERE user_id = %s",
@@ -368,13 +589,26 @@ def _save_booking(user_id: int, show_id: int, movie: dict,
     conn = _db()
     total_seats = len(seat_ids)
 
-    if not conn:
-        # Demo / offline mode
-        print(f"[DEMO] Booking saved: show_id={show_id} "
-              f"seats={seat_ids}  total=₹{total_amount:.0f}")
-        return True
+    if (not conn) or show_id <= 0 or any(int(sid) <= 0 for sid in seat_ids):
+        return False
     try:
         cur = conn.cursor()
+        placeholders = ", ".join(["%s"] * len(seat_ids))
+
+        cur.execute(
+            f"""SELECT seat_id, is_booked
+                FROM seats
+                WHERE show_id = %s AND seat_id IN ({placeholders})
+                FOR UPDATE""",
+            [show_id, *seat_ids],
+        )
+        rows = cur.fetchall()
+        if len(rows) != len(seat_ids):
+            conn.rollback()
+            return False
+        if any(int(row[1]) == 1 for row in rows):
+            conn.rollback()
+            return False
 
         # 1. Insert booking record
         cur.execute(
@@ -390,8 +624,12 @@ def _save_booking(user_id: int, show_id: int, movie: dict,
                 "INSERT INTO booking_seats (booking_id, seat_id) VALUES (%s, %s)",
                 (booking_id, seat_id))
             cur.execute(
-                "UPDATE seats SET is_booked = 1 WHERE seat_id = %s",
-                (seat_id,))
+                "UPDATE seats SET is_booked = 1 WHERE seat_id = %s AND is_booked = 0",
+                (seat_id,),
+            )
+            if cur.rowcount != 1:
+                conn.rollback()
+                return False
 
         conn.commit()
         print(f"[DB] Booking #{booking_id} confirmed — "
@@ -413,15 +651,19 @@ def _save_rating(user_id: int, movie_id: int,
     """
     conn = _db()
     if not conn:
-        print(f"[DEMO] Rating saved: movie_id={movie_id}  score={score}")
-        return True
+        return False
     try:
         cur = conn.cursor()
         cur.execute(
-            """INSERT INTO ratings (user_id, movie_id, score, review)
-               VALUES (%s, %s, %s, %s)
-               ON DUPLICATE KEY UPDATE score = %s, review = %s""",
-            (user_id, movie_id, score, review, score, review))
+            "UPDATE ratings SET score = %s, review = %s WHERE user_id = %s AND movie_id = %s",
+            (score, review, user_id, movie_id),
+        )
+        if cur.rowcount == 0:
+            cur.execute(
+                """INSERT INTO ratings (user_id, movie_id, score, review)
+                   VALUES (%s, %s, %s, %s)""",
+                (user_id, movie_id, score, review),
+            )
         conn.commit()
         print(f"[DB] Rating saved: user={user_id}  movie={movie_id}  score={score}")
         return True
@@ -458,6 +700,47 @@ def _seat_color(seats) -> str:
     if n > 10: return ACCENT_ORG
     return ACCENT_RED
 
+
+
+def _seat_status_text(seats) -> str:
+    try:
+        n = int(seats) if seats is not None else 0
+    except (ValueError, TypeError):
+        n = 0
+    if n > 30:
+        return "Available"
+    if n > 10:
+        return "Filling Fast"
+    return "Almost Full"
+
+
+def _fetch_live_movie_availability(limit: int = 8) -> list:
+    conn = _db()
+    if not conn:
+        return []
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """SELECT m.movie_id,
+                      m.title,
+                      m.genre,
+                      COALESCE(SUM(CASE WHEN se.is_booked = 0 THEN 1 ELSE 0 END), 0) AS available_seats,
+                      COUNT(DISTINCT s.show_id) AS active_shows
+               FROM movies m
+               LEFT JOIN shows s ON s.movie_id = m.movie_id
+               LEFT JOIN seats se ON se.show_id = s.show_id
+               WHERE m.is_active = 1
+               GROUP BY m.movie_id, m.title, m.genre
+               ORDER BY available_seats ASC, m.title ASC
+               LIMIT %s""",
+            (limit,),
+        )
+        return cur.fetchall() or []
+    except Exception as exc:
+        print(f"[DASH] _fetch_live_movie_availability: {exc}")
+        return []
+    finally:
+        conn.close()
 
 # ─────────────────────────────────────────────
 #  PARTICLE CANVAS
@@ -613,10 +896,12 @@ def stat_chip(parent, icon, value, label, accent):
     f.pack(side="left", padx=8, ipadx=14, ipady=8)
     tk.Label(f, text=icon, font=("Segoe UI Emoji", 20),
              bg=BG_CARD2, fg=accent).pack()
-    tk.Label(f, text=str(value), font=("Georgia", 18, "bold"),
-             bg=BG_CARD2, fg=TXT_WHITE).pack()
+    value_lbl = tk.Label(f, text=str(value), font=("Georgia", 18, "bold"),
+                         bg=BG_CARD2, fg=TXT_WHITE)
+    value_lbl.pack()
     tk.Label(f, text=label, font=("Trebuchet MS", 8),
              bg=BG_CARD2, fg=TXT_GREY).pack()
+    return value_lbl
 
 
 # ─────────────────────────────────────────────
@@ -826,24 +1111,27 @@ class BookingModal(tk.Toplevel):
                  font=("Trebuchet MS", 12, "bold"),
                  bg=strip_bg, fg=TXT_WHITE).pack(side="left")
 
-        tk.Label(self._body, text="Available Shows",
+        tk.Label(self._body, text="Choose a Live Show",
                  font=("Georgia", 12, "bold"),
-                 bg=BG_MODAL, fg=TXT_WHITE).pack(anchor="w", pady=(0, 8))
+                 bg=BG_MODAL, fg=TXT_WHITE).pack(anchor="w", pady=(0, 2))
+        tk.Label(self._body, text="Seat counts below update from the database for all users.",
+                 font=("Trebuchet MS", 8),
+                 bg=BG_MODAL, fg=TXT_MUTED).pack(anchor="w", pady=(0, 8))
 
         shows = _fetch_shows_for_movie(m["id"])
 
         if not shows:
-            # ── No shows in DB ─────────────────────────────────────────────
+            # ?? No shows in DB ?????????????????????????????????????????????
             tk.Label(self._body,
                      text=(
-                         "⚠  No shows are scheduled for this movie yet.\n\n"
-                         "Please ask your admin to add shows in the database,\n"
-                         "or choose a different movie."
+                          "?  No shows are scheduled for this movie yet.\n\n"
+                          "Please ask your admin to add shows in the database,\n"
+                          "or choose a different movie."
                      ),
                      font=("Trebuchet MS", 11),
                      bg=BG_MODAL, fg=TXT_MUTED,
                      justify="center").pack(expand=True)
-            back = tk.Label(self._body, text="← Back to Movies",
+            back = tk.Label(self._body, text="? Back to Movies",
                             font=("Trebuchet MS", 9),
                             bg=BG_INPUT, fg=TXT_GREY,
                             padx=14, pady=7, cursor="hand2")
@@ -939,10 +1227,10 @@ class BookingModal(tk.Toplevel):
         tk.Label(strip, text=f"{m['emoji']}  {m['title']}",
                  font=("Trebuchet MS", 11, "bold"),
                  bg=strip_bg, fg=TXT_WHITE).pack(side="left")
-        show_lbl = (f"📅 {sh.get('show_date','')}  "
-                    f"🕐 {str(sh.get('show_time',''))[:5]}  "
-                    f"🏛 {sh.get('hall','')}  "
-                    f"₹{sh.get('price','')}/seat")
+        show_lbl = (f"Date {sh.get('show_date','')}  "
+                    f"Time {str(sh.get('show_time',''))[:5]}  "
+                    f"Hall {sh.get('hall','')}  "
+                    f"Rs {sh.get('price','')}/seat")
         tk.Label(strip, text=show_lbl,
                  font=("Trebuchet MS", 8),
                  bg=strip_bg, fg=ACCENT_ORG).pack(side="right")
@@ -953,6 +1241,17 @@ class BookingModal(tk.Toplevel):
         tk.Label(self._body, text="▲  SCREEN  ▲",
                  font=("Trebuchet MS", 7),
                  bg=BG_MODAL, fg=TXT_MUTED).pack()
+
+        live_bar = tk.Frame(self._body, bg=BG_CARD,
+                            highlightbackground=BORDER_DIM, highlightthickness=1)
+        live_bar.pack(fill="x", pady=(8, 8))
+        remaining = int(sh.get("available_seats") or sh.get("total_seats") or 0)
+        tk.Label(live_bar, text=f"Live remaining seats: {remaining}",
+                 font=("Trebuchet MS", 9, "bold"),
+                 bg=BG_CARD, fg=_seat_color(remaining), padx=12, pady=7).pack(side="left")
+        tk.Label(live_bar, text="Availability is shared for all users and updates from the database.",
+                 font=("Trebuchet MS", 8),
+                 bg=BG_CARD, fg=TXT_GREY, padx=12).pack(side="right")
 
         grid_frame = tk.Frame(self._body, bg=BG_MODAL)
         grid_frame.pack(pady=6)
@@ -996,49 +1295,17 @@ class BookingModal(tk.Toplevel):
                     self._seat_btns[sid] = (btn, booked)
 
         else:
-            # ── Demo grid fallback (no seats in DB yet) ───────────────────
-            import random as _rnd
-            _rnd.seed(sh.get("show_id", 1) * 7)
-            total    = self._DEMO_ROWS * self._DEMO_COLS
-            avail_db = sh.get("available_seats") or sh.get("total_seats", total)
-            try:
-                n_booked = total - int(avail_db)
-            except (ValueError, TypeError):
-                n_booked = 0
-            n_booked = max(0, min(n_booked, total))
-            booked_idx = set(_rnd.sample(range(total), n_booked))
-
-            for row_i in range(self._DEMO_ROWS):
-                rk = chr(65 + row_i)
-                tk.Label(grid_frame, text=rk,
-                         font=("Trebuchet MS", 8, "bold"),
-                         bg=BG_MODAL, fg=TXT_MUTED,
-                         width=2).grid(row=row_i, column=0, padx=(0, 6))
-                for col_i in range(self._DEMO_COLS):
-                    idx    = row_i * self._DEMO_COLS + col_i
-                    label  = f"{rk}{col_i + 1}"
-                    fake_id = -(idx + 1)     # negative = demo (no real seat_id)
-                    booked  = idx in booked_idx
-
-                    bg_c = "#3A2020" if booked else BG_INPUT
-                    btn  = tk.Label(grid_frame, text=label,
-                                    font=("Trebuchet MS", 7),
-                                    bg=bg_c,
-                                    fg=TXT_MUTED if booked else TXT_GREY,
-                                    width=4, pady=5,
-                                    cursor="" if booked else "hand2")
-                    btn.grid(row=row_i, column=col_i + 1, padx=2, pady=2)
-                    if not booked:
-                        btn.bind("<Button-1>",
-                                 lambda e, s=fake_id, lbl=label, b=btn:
-                                 self._toggle_seat(s, lbl, b))
-
-            # Warning label
-            tk.Label(self._body,
-                     text="⚠  Seat layout is a preview — "
-                          "no seat records found in DB for this show.",
-                     font=("Trebuchet MS", 7),
-                     bg=BG_MODAL, fg=TXT_MUTED).pack()
+            tk.Label(
+                self._body,
+                text=(
+                    "No seats are configured for this show in the database.\n"
+                    "Please add seat rows for this show and try again."
+                ),
+                font=("Trebuchet MS", 9),
+                bg=BG_MODAL,
+                fg=TXT_MUTED,
+                justify="center",
+            ).pack(pady=12)
 
         # Legend
         legend = tk.Frame(self._body, bg=BG_MODAL)
@@ -1572,48 +1839,128 @@ class DashboardPage(tk.Frame):
 
         tk.Frame(s, bg=SEP, height=1).pack(fill="x", pady=(8, 4))
 
-        # Seat availability panel
-        tk.Label(s, text="🪑  Seat Availability",
-                 font=("Trebuchet MS", 8, "bold"),
-                 bg=BG_SIDEBAR, fg=TXT_GREY).pack(anchor="w", padx=14, pady=(4, 2))
-
-        seat_frame = tk.Frame(s, bg=BG_SIDEBAR)
-        seat_frame.pack(fill="x", padx=10, pady=(0, 6))
-
-        movies = _fetch_movies_from_db()
-        for m in movies[:8]:   # limit sidebar to 8 movies
-            row = tk.Frame(seat_frame, bg=BG_SIDEBAR, cursor="hand2")
-            row.pack(fill="x", pady=1)
-            tk.Label(row, text=m["emoji"],
-                     font=("Segoe UI Emoji", 11),
-                     bg=BG_SIDEBAR).pack(side="left", padx=(0, 4))
-            short = (m["title"][:14] + "…") if len(m["title"]) > 14 else m["title"]
-            tk.Label(row, text=short,
-                     font=("Trebuchet MS", 8),
-                     bg=BG_SIDEBAR, fg=TXT_GREY,
-                     anchor="w").pack(side="left", fill="x", expand=True)
-            sc = _seat_color(m.get("seats", 30))
-            tk.Label(row, text=str(m.get("seats", "—")),
-                     font=("Trebuchet MS", 8, "bold"),
-                     bg=BG_SIDEBAR, fg=sc,
-                     width=3, anchor="e").pack(side="right")
-
-            for w in [row] + list(row.winfo_children()):
-                w.bind("<Button-1>", lambda e, mv=m: self._open_booking(mv))
-                w.bind("<Enter>",    lambda e, w=row: w.config(bg=_darken(BG_CARD, 1.3)))
-                w.bind("<Leave>",    lambda e, w=row: w.config(bg=BG_SIDEBAR))
-
         # Logout
-        tk.Frame(s, bg=SEP, height=1).pack(fill="x", side="bottom", pady=4)
-        logout = tk.Label(s, text="⬅  Logout",
-                          font=("Trebuchet MS", 9),
-                          bg=BG_SIDEBAR, fg=TXT_MUTED,
-                          cursor="hand2", pady=10)
-        logout.pack(side="bottom", fill="x", padx=16)
-        logout.bind("<Enter>",    lambda e: logout.config(fg=ACCENT_RED))
-        logout.bind("<Leave>",    lambda e: logout.config(fg=TXT_MUTED))
+        footer = tk.Frame(s, bg=BG_SIDEBAR)
+        footer.pack(side="bottom", fill="x", padx=12, pady=10)
+        tk.Frame(footer, bg=SEP, height=1).pack(fill="x", pady=(0, 8))
+        logout = tk.Label(
+            footer,
+            text="Logout",
+            font=("Trebuchet MS", 9, "bold"),
+            bg=ACCENT_RED,
+            fg=TXT_WHITE,
+            cursor="hand2",
+            padx=12,
+            pady=8,
+        )
+        logout.pack(fill="x")
+        logout.bind("<Enter>", lambda e: logout.config(bg="#B01010"))
+        logout.bind("<Leave>", lambda e: logout.config(bg=ACCENT_RED))
         logout.bind("<Button-1>",
                     lambda e: self._on_logout() if self._on_logout else None)
+
+        # Seat availability panel
+        availability = tk.Frame(s, bg=BG_SIDEBAR)
+        availability.pack(fill="both", expand=True, padx=10, pady=(0, 6))
+        tk.Label(availability, text="Live Seat Availability",
+                 font=("Trebuchet MS", 8, "bold"),
+                 bg=BG_SIDEBAR, fg=TXT_GREY).pack(anchor="w", padx=4, pady=(4, 2))
+        tk.Label(availability, text="Shared live counts across all active shows",
+                 font=("Trebuchet MS", 7),
+                 bg=BG_SIDEBAR, fg=TXT_MUTED).pack(anchor="w", padx=4, pady=(0, 6))
+
+        seat_wrap = tk.Frame(availability, bg=BG_SIDEBAR)
+        seat_wrap.pack(fill="both", expand=True)
+        self._seat_canvas = tk.Canvas(
+            seat_wrap,
+            bg=BG_SIDEBAR,
+            highlightthickness=0,
+            bd=0,
+            width=185,
+        )
+        seat_scroll = ttk.Scrollbar(seat_wrap, orient="vertical", command=self._seat_canvas.yview)
+        self._seat_canvas.configure(yscrollcommand=seat_scroll.set)
+        seat_scroll.pack(side="right", fill="y")
+        self._seat_canvas.pack(side="left", fill="both", expand=True)
+
+        self._seat_frame = tk.Frame(self._seat_canvas, bg=BG_SIDEBAR)
+        self._seat_canvas_window = self._seat_canvas.create_window(
+            (0, 0), window=self._seat_frame, anchor="nw"
+        )
+        self._seat_frame.bind(
+            "<Configure>",
+            lambda e: self._seat_canvas.configure(scrollregion=self._seat_canvas.bbox("all"))
+        )
+        self._seat_canvas.bind(
+            "<Configure>",
+            lambda e: self._seat_canvas.itemconfig(self._seat_canvas_window, width=e.width)
+        )
+        self._refresh_live_seat_sidebar()
+
+    def _refresh_live_seat_sidebar(self):
+        if not hasattr(self, "_seat_frame"):
+            return
+        for widget in self._seat_frame.winfo_children():
+            widget.destroy()
+
+        live_rows = _fetch_live_movie_availability(limit=8)
+        movies = _fetch_movies_from_db()
+        if not live_rows:
+            tk.Label(self._seat_frame, text="No live seat data available yet.",
+                     font=("Trebuchet MS", 8),
+                     bg=BG_SIDEBAR, fg=TXT_MUTED).pack(anchor="w", padx=4, pady=6)
+            return
+
+        for row_data in live_rows:
+            row = tk.Frame(self._seat_frame, bg=BG_CARD, cursor="hand2",
+                           highlightbackground=BORDER_DIM, highlightthickness=1)
+            row.pack(fill="x", pady=3, ipady=5, ipadx=6)
+            title = str(row_data.get("title", "Movie"))
+            short = (title[:13] + "...") if len(title) > 13 else title
+            available = int(row_data.get("available_seats") or 0)
+            active_shows = int(row_data.get("active_shows") or 0)
+            sc = _seat_color(available)
+            status = _seat_status_text(available)
+
+            title_lbl = tk.Label(row, text=short,
+                                 font=("Trebuchet MS", 8, "bold"),
+                                 bg=BG_CARD, fg=TXT_WHITE, anchor="w")
+            title_lbl.pack(anchor="w")
+            meta = tk.Frame(row, bg=BG_CARD)
+            meta.pack(fill="x", pady=(2, 0))
+            live_lbl = tk.Label(meta, text=f"{available} seats live",
+                                font=("Trebuchet MS", 8, "bold"),
+                                bg=BG_CARD, fg=sc)
+            live_lbl.pack(side="left")
+            shows_lbl = tk.Label(meta, text=f"{max(active_shows, 1)} shows",
+                                 font=("Trebuchet MS", 7),
+                                 bg=BG_CARD, fg=TXT_GREY)
+            shows_lbl.pack(side="right")
+            status_lbl = tk.Label(row, text=status,
+                                  font=("Trebuchet MS", 7),
+                                  bg=BG_CARD, fg=TXT_MUTED, anchor="w")
+            status_lbl.pack(anchor="w", pady=(1, 0))
+
+            movie_match = next((m for m in movies if m.get("id") == row_data.get("movie_id")), None)
+            widgets = [row, title_lbl, meta, live_lbl, shows_lbl, status_lbl]
+            for widget in widgets:
+                widget.bind("<Button-1>", lambda e, mv=movie_match: self._open_booking(mv) if mv else None)
+                widget.bind("<Enter>", lambda e, w=row, t=title_lbl, m=meta, l=live_lbl, s=shows_lbl, st=status_lbl: (
+                    w.config(bg=_darken(BG_CARD, 1.15)),
+                    t.config(bg=_darken(BG_CARD, 1.15)),
+                    m.config(bg=_darken(BG_CARD, 1.15)),
+                    l.config(bg=_darken(BG_CARD, 1.15)),
+                    s.config(bg=_darken(BG_CARD, 1.15)),
+                    st.config(bg=_darken(BG_CARD, 1.15))
+                ))
+                widget.bind("<Leave>", lambda e, w=row, t=title_lbl, m=meta, l=live_lbl, s=shows_lbl, st=status_lbl: (
+                    w.config(bg=BG_CARD),
+                    t.config(bg=BG_CARD),
+                    m.config(bg=BG_CARD),
+                    l.config(bg=BG_CARD),
+                    s.config(bg=BG_CARD),
+                    st.config(bg=BG_CARD)
+                ))
 
     def _build_right(self, parent):
         canvas = tk.Canvas(parent, bg=BG_DARK,
@@ -1706,10 +2053,12 @@ class DashboardPage(tk.Frame):
         sec.pack(fill="x", padx=24)
         row = tk.Frame(sec, bg=BG_DARK)
         row.pack(anchor="w")
-        stat_chip(row, "🎟", self._stats["booked"],    "Tickets Booked", ACCENT_RED)
-        stat_chip(row, "🎬", self._stats["watched"],   "Confirmed Shows", ACCENT_BLUE)
-        stat_chip(row, "⭐", self._stats["avg_rating"], "Avg Score",      ACCENT_ORG)
-        stat_chip(row, "💳", f"₹{self._stats['spent']}", "Total Spent",  ACCENT_PURP)
+        self._stat_labels = {
+            "booked": stat_chip(row, "BK", self._stats["booked"], "Tickets Booked", ACCENT_RED),
+            "watched": stat_chip(row, "OK", self._stats["watched"], "Confirmed Shows", ACCENT_BLUE),
+            "avg_rating": stat_chip(row, "RT", self._stats["avg_rating"], "Avg Score", ACCENT_ORG),
+            "spent": stat_chip(row, "Rs", f"Rs {self._stats['spent']}", "Total Spent", ACCENT_PURP),
+        }
 
     def _get_ml_recs(self, n=5):
         try:
@@ -1870,6 +2219,12 @@ class DashboardPage(tk.Frame):
 
     def _refresh_stats(self):
         self._stats = _fetch_user_stats(self._user.get("user_id", 0))
+        if hasattr(self, "_stat_labels"):
+            self._stat_labels["booked"].config(text=str(self._stats["booked"]))
+            self._stat_labels["watched"].config(text=str(self._stats["watched"]))
+            self._stat_labels["avg_rating"].config(text=str(self._stats["avg_rating"]))
+            self._stat_labels["spent"].config(text=f"Rs {self._stats['spent']}")
+        self._refresh_live_seat_sidebar()
 
     def _flash(self, msg: str, ms: int = 2000):
         toast = tk.Toplevel(self)
